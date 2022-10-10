@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up mold
+        uses: rui314/setup-mold@v1
+      - name: Install sccache
+        env:
+          LINK: https://github.com/mozilla/sccache/releases/download
+          SCCACHE_VERSION: 0.3.0
+        shell: bash
+        run: |
+          SCCACHE_FILE=sccache-v$SCCACHE_VERSION-x86_64-unknown-linux-musl
+          mkdir -p $HOME/.local/bin
+          curl -L "$LINK/v$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
+          mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
+          chmod +x $HOME/.local/bin/sccache
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Prepare sccache
+        uses: actions/cache@v2
+        continue-on-error: false
+        with:
+          path: |
+            ~/.cache/sccache
+            ~/.cargo/.crates2.json
+            ~/.cargo/.crates.toml
+            ~/.cargo/git
+            ~/.cargo/registry/cache
+            ~/.cargo/registry/index
+          key: v0-${{ runner.os }}-${{ inputs.rust-version }}-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            v0-${{ runner.os }}-${{ inputs.rust-version }}-build-
+      - name: Set up rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: default
+
+      - name: Start sccache server
+        env:
+          SCCACHE_CACHE_SIZE: 512M
+        shell: bash
+        run: SCCACHE_DIR="${HOME}/.cache/sccache" sccache --start-server
+
+      - name: check
+        shell: bash
+        env:
+          RUSTC_WRAPPER: sccache
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-D warnings"
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --locked
+      - name: build
+        shell: bash
+        env:
+          RUSTC_WRAPPER: sccache
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-D warnings"
+        run: |
+          cargo build --locked
+      - name: Test
+        shell: bash
+        env:
+          RUSTC_WRAPPER: sccache
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-D warnings"
+        run: cargo test --locked
+      - name: Stop sccache server
+        shell: bash
+        run: sccache --stop-server || true
+
