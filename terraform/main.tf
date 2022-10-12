@@ -27,4 +27,5 @@ module "github-runner" {
   runner_binaries_syncer_lambda_zip = "lambdas-download/runner-binaries-syncer.zip"
   runners_lambda_zip                = "lambdas-download/runners.zip"
   enable_organization_runners = true
+  instance_types = ["t4g.medium"]
 }
