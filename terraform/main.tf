@@ -9,7 +9,7 @@ resource "random_id" "random" {
 
 module "github-runner" {
   source  = "philips-labs/github-runner/aws"
-  version = "1.11.0"
+  version = "1.12.0"
 
   create_service_linked_role_spot = true
   aws_region = local.aws_region
@@ -29,6 +29,10 @@ module "github-runner" {
   runners_lambda_zip                = "lambdas-download/runners.zip"
   enable_organization_runners = true
   runner_extra_labels = "aws"
+  log_level = "debug"
+
+  enable_ssm_on_runners = true
+
   instance_types = ["t4g.medium"]
 
   # override delay of events in seconds

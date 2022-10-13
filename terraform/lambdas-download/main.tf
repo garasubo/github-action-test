@@ -4,7 +4,7 @@ locals {
 
 module "lambdas" {
   source = "philips-labs/github-runner/aws//modules/download-lambda"
-  version = "1.11.0"
+  version = "1.12.0"
 
   lambdas = [
     {
