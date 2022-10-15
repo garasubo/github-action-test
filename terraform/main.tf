@@ -30,6 +30,7 @@ module "github-runner" {
   enable_organization_runners = true
   runner_extra_labels = "aws"
   log_level = "debug"
+  runner_enable_workflow_job_labels_check = true
 
   enable_ssm_on_runners = true
 
