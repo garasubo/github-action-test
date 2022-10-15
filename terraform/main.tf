@@ -34,7 +34,7 @@ module "github-runner" {
 
   enable_ssm_on_runners = true
 
-  # instance_types = ["t4g.medium"]
+  instance_types = ["t3a.medium"]
 
   # override delay of events in seconds
   delay_webhook_event   = 5
@@ -91,11 +91,6 @@ module "github-runner" {
       cron      = "* * 20-23 * * 1-5"
       timeZone  = "Asia/Tokyo"
       idleCount = 1
-    },
-    {
-      cron      = "* * 15-21 * * 6"
-      timeZone  = "Asia/Tokyo"
-      idleCount = 1
-    },
+    }
   ]
 }
