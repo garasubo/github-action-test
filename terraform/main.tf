@@ -40,9 +40,62 @@ module "github-runner" {
   delay_webhook_event   = 5
   runners_maximum_count = 2
 
-  idle_config = [{
-    cron      = "* * 20-23 * * 1-5"
-    timeZone  = "Asia/Tokyo"
-    idleCount = 1
+  runner_run_as = "ubuntu"
+
+  # AMI selection and userdata
+  #
+  # option 1. configure your pre-built AMI + userdata
+  userdata_template = "./templates/user-data.sh"
+  ami_owners        = ["099720109477"] # Canonical's Amazon account ID
+
+  ami_filter = {
+    name = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+
+  block_device_mappings = [{
+    # Set the block device name for Ubuntu root device
+    device_name           = "/dev/sda1"
+    delete_on_termination = true
+    volume_type           = "gp3"
+    volume_size           = 30
+    encrypted             = true
+    iops                  = null
+    throughput            = null
+    kms_key_id            = null
+    snapshot_id           = null
   }]
+
+  runner_log_files = [
+    {
+      "log_group_name" : "syslog",
+      "prefix_log_group" : true,
+      "file_path" : "/var/log/syslog",
+      "log_stream_name" : "{instance_id}"
+    },
+    {
+      "log_group_name" : "user_data",
+      "prefix_log_group" : true,
+      "file_path" : "/var/log/user-data.log",
+      "log_stream_name" : "{instance_id}/user_data"
+    },
+    {
+      "log_group_name" : "runner",
+      "prefix_log_group" : true,
+      "file_path" : "/opt/actions-runner/_diag/Runner_**.log",
+      "log_stream_name" : "{instance_id}/runner"
+    }
+  ]
+
+  idle_config = [
+    {
+      cron      = "* * 20-23 * * 1-5"
+      timeZone  = "Asia/Tokyo"
+      idleCount = 1
+    },
+    {
+      cron      = "* * 15-21 * * 6"
+      timeZone  = "Asia/Tokyo"
+      idleCount = 1
+    },
+  ]
 }

@@ -11,10 +11,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: install packages
-        shell: bash
-        run: |
-          sudo apt install -y build-essential
       - name: check mold
         id: check-mold
         shell: bash
