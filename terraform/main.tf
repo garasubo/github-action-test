@@ -27,14 +27,14 @@ module "github-runner" {
   webhook_lambda_zip                = "lambdas-download/webhook.zip"
   runner_binaries_syncer_lambda_zip = "lambdas-download/runner-binaries-syncer.zip"
   runners_lambda_zip                = "lambdas-download/runners.zip"
-  enable_organization_runners = true
+  # enable_organization_runners = true
   runner_extra_labels = "aws"
   log_level = "debug"
   runner_enable_workflow_job_labels_check = true
 
   enable_ssm_on_runners = true
 
-  instance_types = ["t4g.medium"]
+  # instance_types = ["t4g.medium"]
 
   # override delay of events in seconds
   delay_webhook_event   = 5
